@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html>
+<head>
+		<title>API后台管理系统</title>
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8" />
+	<meta name="Keywords" content="系统，管理"/>
+	 <link href="/resources/css/bootstrap.min.css" rel="stylesheet">
+     <link href="/resources/css/sellerbase.css" rel="stylesheet">
+	
+    
+</head>
+   <body ng-app="mainApp" ng-controller="mainCtrl">
+  	<div ui-view></div>
+<!-- 按钮触发模态框 -->
+<button class="hide" data-toggle="modal" 
+   data-target="#myModal" id="mySellerModal">
+</button>
+	<!-- 模态框（Modal） -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" 
+   aria-labelledby="myModalLabel" aria-hidden="true">
+   <div class="modal-dialog" >
+      <div class="modal-content">
+         <div class="modal-header">
+            <button type="button" class="close" 
+               data-dismiss="modal" aria-hidden="true" id="closeModal">
+                  &times;
+            </button>
+            <h4 class="modal-title" id="mySellerModalLabel">
+            </h4>
+         </div>
+         <div class="modal-body" id="mySellerModalBody">
+         </div>
+         <div class="modal-footer">
+         	<div id="errorSellerInfo" class="text-justify text-danger"></div>
+            <button type="button" class="btn btn-primary" id="sellerSubmit">
+               提交
+            </button>
+         </div>
+      </div><!-- /.modal-content -->
+</div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+		<script src="/resources/js/jquery2.1.js"></script>
+		<script src="/resources/js/bootstrap3.2.0.js"></script>
+		<script src="/resources/js/angularjs.min.1.5.7.js"></script>
+		<script src="/resources/js/angular-animate.min.js"></script>
+		<script src="/resources/js/angular-ui-router.min.js"></script>
+        <script src="/resources/js/sortable.min.js"></script>
+       <script src="/resources/js/base64.js"></script> 
+       <script src="/resources/js/base.js"></script> 
+       <script type="text/javascript">
+       
+       angular.module('mainApp', ['ngAnimate','ui.router'])
+       .config(function ($stateProvider, $urlRouterProvider) {
+     	$urlRouterProvider.when("", "main");
+     	$stateProvider
+     	.state("main", {
+            url: "/main",
+            views: {
+                '': {
+                    templateUrl: '/seller/templates/main.html'
+                },
+                'topbar@main': {
+                    templateUrl: '/seller/templates/topbar.html'
+                },
+                'leftbar@main': {
+                    templateUrl: '/seller/templates/leftbar.html',
+                    controller:function(){
+                    	myUtils.myClickRotate("a.toCaret","span.caret");//箭头旋转
+                    }
+                } ,
+                'rightbody@main': {
+                    templateUrl: '/seller/templates/notice.html'
+                } 
+            }
+        })
+         .state("main.notice", {
+            url:"/notice",
+            views: {
+            	'rightbody@main': {
+                    templateUrl: "/seller/templates/notice.html"
+                } 
+            }
+        }).state("main.channelAdd", {
+            url:"/channelAdd",
+            views: {
+            	'rightbody@main': {
+                    templateUrl: "/seller/templates/channel_add.html",
+                    controller:function($scope,$state){
+          		$scope.goChannelList=function(){
+    			$state.go("main.channelList");
+    			}
+				$scope.name="";
+				$scope.cell_phone="";
+				$scope.email="";
+				$scope.password="";
+    			$scope.addChannelForm=function(){
+    			console.log($scope.name)
+    			console.log($scope.cell_phone)
+    			console.log($scope.email)
+    			 $.post("/channel/add",
+    			{
+    			name:$scope.name,
+    			cellPhone:$scope.cell_phone,
+    			email:$scope.email,
+    			password:$scope.password,
+    			apiToken:"",
+    			createDate:new Date(),
+    			createDate:new Date()
+    			},
+    			 function(data){
+    			 $scope.name="";
+				$scope.cell_phone="";
+				$scope.email="";
+				$scope.password="";
+				$scope.$apply();
+    			  myUtils.myLoadingToast("提交成功", null);
+    			 });
+    			};
+          
+          }}}
+        })
+        .state("main.channelList", {
+            url:"/channelList",
+            views: {
+            	'rightbody@main': {
+                    templateUrl: "/seller/templates/channel_list.html"
+                	,controller:function($scope,$state){
+                	$scope.channelList=[];
+    		$scope.noMore=false;//false还有，true没有更多
+    		$scope.totalNumber=0;//总管理员数目
+ 			$scope.showPageNumberArray=[];//显示页面循环的数组 类似 1,2,3,4,5
+			$scope.totalPage=0;//总页数
+				
+			$scope.currentPage=1;//当前页
+			$scope.pageNumber=5;//每页显示数目
+			$scope.mostShowPageNumber=5;//设定最多显示页码数目	
+			$scope.pagination=myUtils.myPaginationHandler();
+			
+			//点击哪页显示哪页
+			$scope.toPage=function(content){
+			  if($scope.pagination.toPage(content,$scope.currentPage,$scope.totalPage)){
+			  //$scope.showNoticeListIcon=true;
+			  $scope.currentPage=$scope.pagination.currentPage;
+			  $scope.channelListInit();
+			  }
+			};
+			$scope.channelListInit=function(){
+			  $.get("/channel/count",function(cd){
+           		$scope.totalNumber=cd;             
+           //页码初始化
+          $scope.totalPage=$scope.pagination.getTotalPage($scope.totalNumber,$scope.pageNumber);//总页码数目     
+          $scope.showPageNumberArray=$scope.pagination.getShowPageNumber($scope.totalPage,$scope.pageNumber,$scope.mostShowPageNumber,$scope.currentPage);//显示页码数目 
+        //初始化
+  $.get("/channel/list?pageNum="+(($scope.currentPage-1)*$scope.pageNumber+1)+"&pageSize="+$scope.pageNumber,function(pld){
+           $scope.channelList=pld;
+         //  $scope.showNoticeListIcon=false;
+			$scope.$apply();
+               });
+       });
+			};
+			$scope.channelListInit();
+    			//跳转增加渠道
+    			$scope.goChannelAdd=function(){
+    			$state.go("main.channelAdd");
+    			}
+    			//跳转channel_id的渠道广告
+    			$scope.goAd=function(channel_id,api_token){
+    			$state.go("main.adList",{channel_id:channel_id,api_token:api_token});
+    			}
+    			//跳转channel_id的点击列表
+    			$scope.goClick=function(channel_id){
+    			$state.go("main.clickList",{channel_id:channel_id});
+    			}
+                   		
+                		//跳转更新
+                		$scope.updateadvertise=function(advertise){
+	                	$state.go("main.update",{advertise_id:advertise.advertise_id})	
+                		}
+                		//删除渠道
+                		$scope.delChannel=function(channel){
+                			myUtils.myLoginOut("确定删除吗？", function(){
+                   				$.get("/channel/"+channel.channel_id+"/delete",function(data){
+                   	   				if(data.code==200){
+                   	   				$scope.channelList.splice($scope.channelList.indexOf(channel), 1);
+                   	   				$scope.$apply();
+                   	   				myUtils.myLoadingToast("删除成功", null); 
+                   	   				
+                   	   				}else{
+                   	   					myUtils.myLoadingToast("删除失败", null);   	   				
+                   	   				}
+                   	   			});
+                   			});
+                			
+                		};
+                		
+                    }
+            	} 
+            }
+        })
+             .state("main.adList", {
+            url:"/adList/:channel_id/:api_token",
+            views: {
+            	'rightbody@main': {
+                    templateUrl: "/seller/templates/ad_list.html"
+                	,controller:function($scope,$state){
+                	//跳转渠道列表
+    			$scope.goChannelList=function(){
+    			$state.go("main.channelList");
+    			}
+               $scope.adList=[]; 		
+    		$scope.noMore=false;//false还有，true没有更多
+    		$scope.totalNumber=0;//总管理员数目
+ 			$scope.showPageNumberArray=[];//显示页面循环的数组 类似 1,2,3,4,5
+			$scope.totalPage=0;//总页数
+				
+			$scope.currentPage=1;//当前页
+			$scope.pageNumber=5;//每页显示数目
+			$scope.mostShowPageNumber=5;//设定最多显示页码数目	
+			$scope.pagination=myUtils.myPaginationHandler();
+			
+			//点击哪页显示哪页
+			$scope.toPage=function(content){
+			  if($scope.pagination.toPage(content,$scope.currentPage,$scope.totalPage)){
+			  //$scope.showNoticeListIcon=true;
+			  $scope.currentPage=$scope.pagination.currentPage;
+			  $scope.adListInit();
+			  }
+			};
+			$scope.adListInit=function(){
+			  $.get("/ad/count/"+$state.params.channel_id,function(cd){
+           		$scope.totalNumber=cd;             
+           //页码初始化
+          $scope.totalPage=$scope.pagination.getTotalPage($scope.totalNumber,$scope.pageNumber);//总页码数目     
+          $scope.showPageNumberArray=$scope.pagination.getShowPageNumber($scope.totalPage,$scope.pageNumber,$scope.mostShowPageNumber,$scope.currentPage);//显示页码数目 
+        //初始化
+  //$.get("/ad/plist?api_token="+$state.params.api_token+"&pageNum="+(($scope.currentPage-1)*$scope.pageNumber+1)+"&pageSize="+$scope.pageNumber,function(pld){
+  $.get("/ad/list?channel_id="+$state.params.channel_id+"&pageNum="+(($scope.currentPage-1)*$scope.pageNumber+1)+"&pageSize="+$scope.pageNumber,function(pld){
+        // sessionStorage.setItem("noticeList",JSON.stringify(pld));
+           $scope.adList=pld;
+         //  $scope.showNoticeListIcon=false;
+			 console.log($scope.adList)
+			$scope.$apply();
+               });
+       });
+			};
+			$scope.adListInit();
+    		//切换价格
+    		$scope.toggleAdPrice=function(ad_id,price){
+    		$scope.newprice=price;
+    		$scope.showPrice=ad_id;
+    		};
+    		//修改
+    		$scope.updateAdPrice=function(ad,newprice){
+    		$scope.showPrice="";
+    		$scope.newprice=newprice;
+    		 $.post("/ad/update/"+ad.ad_id,{price:newprice},function(data){
+    		if(data.code==200){
+    		ad.price=$scope.newprice;
+    		$scope.$apply();
+    		myUtils.myLoadingToast("修改成功",null);
+    		}
+    		
+    		}); 
+    		};
+                    }
+            	} 
+            }
+        })
+         .state("main.clickList", {
+            url:"/clickList/:channel_id",
+            views: {
+            	'rightbody@main': {
+                    templateUrl: "/seller/templates/click_list.html"
+                	,controller:function($scope,$state){
+                	//跳转渠道列表
+    			$scope.goChannelList=function(){
+    			$state.go("main.channelList");
+    			}
+               $scope.adList=[]; 		
+    		$scope.noMore=false;//false还有，true没有更多
+    		$scope.totalNumber=0;//总管理员数目
+ 			$scope.showPageNumberArray=[];//显示页面循环的数组 类似 1,2,3,4,5
+			$scope.totalPage=0;//总页数
+				
+			$scope.currentPage=1;//当前页
+			$scope.pageNumber=5;//每页显示数目
+			$scope.mostShowPageNumber=5;//设定最多显示页码数目	
+			$scope.pagination=myUtils.myPaginationHandler();
+			
+			//点击哪页显示哪页
+			$scope.toPage=function(content){
+			  if($scope.pagination.toPage(content,$scope.currentPage,$scope.totalPage)){
+			  //$scope.showNoticeListIcon=true;
+			  $scope.currentPage=$scope.pagination.currentPage;
+			  $scope.clickListInit();
+			  }
+			};
+			
+			$scope.clickListInit=function(){
+			  $.get("/click/count/"+$state.params.channel_id,function(cd){
+           		$scope.totalNumber=cd;             
+           //页码初始化
+          $scope.totalPage=$scope.pagination.getTotalPage($scope.totalNumber,$scope.pageNumber);//总页码数目     
+          $scope.showPageNumberArray=$scope.pagination.getShowPageNumber($scope.totalPage,$scope.pageNumber,$scope.mostShowPageNumber,$scope.currentPage);//显示页码数目 
+        //初始化
+  //$.get("/ad/plist?api_token="+$state.params.api_token+"&pageNum="+(($scope.currentPage-1)*$scope.pageNumber+1)+"&pageSize="+$scope.pageNumber,function(pld){
+  $.get("/click/list?channel_id="+$state.params.channel_id+"&pageNum="+(($scope.currentPage-1)*$scope.pageNumber+1)+"&pageSize="+$scope.pageNumber,function(pld){
+        // sessionStorage.setItem("noticeList",JSON.stringify(pld));
+           $scope.clickList=pld;
+         //  $scope.showNoticeListIcon=false;
+			 console.log($scope.clickList)
+			$scope.$apply();
+               });
+       });
+			};
+			$scope.clickListInit();
+    				
+                    }
+            	} 
+            }
+        })
+         .state("main.update", {
+            url:"/update/:advertise_id",
+            views: {
+            	'rightbody@main': {
+                    templateUrl: "/seller/templates/advertise_update.html"
+                    ,controller:function($scope,$state){
+                    	//单个测试列表
+                   		function initSingleadvertise(advertise_id){
+                   			var urllist="/advertise/"+advertise_id+"/all";
+                			$.ajax({  
+                		          type : "get",  
+                		          url : urllist,  
+                		          async : false,  
+                		          success : function(data){
+                		        	  console.log(data);
+                		        	  $scope.advertise=JSON.parse(data);
+                		          }  
+                		          });  
+                		}
+                   		//初始化
+                		initSingleadvertise($state.params.advertise_id);
+                   		//result 与 order_number转换
+                   		$scope.answerResultTransform=function(answer){
+							if(answer.type=="跳转"){
+								answer.result=parseInt(answer.result);
+                   			console.log(answer)
+							}
+                   		}
+                   	//上传测试图片
+                 		$("#updateadvertiseFileUpload").change(function(){
+                    		//console.log($("#advertiseFileUpload"))
+                 		//function advertiseFileUpload(){
+                 			myUtils.fileUpload(
+                 				    {inputfile:$("#updateadvertiseFileUpload"),
+                 				    ajaxObj:{
+                 				        formData:[
+                 				            {key:"advertiseFileUpload",value:$("#updateadvertiseFileUpload").get(0).files[0]}
+                 				            ],
+                 				        url:"/advertise/img/add",
+                 				        success:function(data){
+                 				            if(data){
+                 				            myUtils.myLoadingToast("上传成功",null);
+                 				            myUtils.myPrevToast("上传成功",null,"remove");
+                 				           $scope.advertise.img=data;
+                 				           $scope.$apply();
+                 				            }
+                 				        }
+                 				    }
+                 				}
+                 				);
+                 		});
+                   		//更新
+                		$scope.updateadvertiseForm=function(){
+                			myUtils.myPrevToast("添加中", function(){
+                        		$.ajax({  
+                  		          url : "/advertise/update/all",  
+                  		          type : "post",  
+                  		         // contentType:"application/json",
+                  		          data:{advertiseDTO:angular.toJson($scope.advertise)},
+                  		         // async : true,  
+                  		          success : function(data){
+                  		        	if(data.code==200){
+                  		        	  myUtils.myPrevToast("修改成功", null, "remove");
+                  		        	  return;
+                  		        	  }
+                  		        	  myUtils.myPrevToast("修改失败", null, "remove");
+                  		          }  
+                  		          });  
+                        		}, "add");
+                			};
+                		}
+                    }
+                } 
+        })
+        .state("main.advertiseList", {
+            url:"/advertiseList",
+            views: {
+            	'rightbody@main': {
+                    templateUrl: "/seller/templates/advertise_list.html"
+                	,controller:function($scope,$state){
+    		$scope.noMore=false;//false还有，true没有更多
+    		$scope.totalNumber=0;//总管理员数目
+ 			$scope.showPageNumberArray=[];//显示页面循环的数组 类似 1,2,3,4,5
+			$scope.totalPage=0;//总页数
+				
+			$scope.currentPage=1;//当前页
+			$scope.pageNumber=5;//每页显示数目
+			$scope.mostShowPageNumber=5;//设定最多显示页码数目	
+			$scope.pagination=myUtils.myPaginationHandler();
+			
+			//点击哪页显示哪页
+			$scope.toPage=function(content){
+			  if($scope.pagination.toPage(content,$scope.currentPage,$scope.totalPage)){
+			  //$scope.showNoticeListIcon=true;
+			  $scope.currentPage=$scope.pagination.currentPage;
+			  $scope.advertiseListInit();
+			  }
+			};
+			$scope.advertiseListInit=function(){
+			  $.get("/advertise/count",function(cd){
+           		$scope.totalNumber=cd;             
+           //页码初始化
+          $scope.totalPage=$scope.pagination.getTotalPage($scope.totalNumber,$scope.pageNumber);//总页码数目     
+          $scope.showPageNumberArray=$scope.pagination.getShowPageNumber($scope.totalPage,$scope.pageNumber,$scope.mostShowPageNumber,$scope.currentPage);//显示页码数目 
+        //初始化
+  $.get("/advertise/list?pageNum="+(($scope.currentPage-1)*$scope.pageNumber+1)+"&pageSize="+$scope.pageNumber,function(pld){
+           $scope.advertiseList=pld;
+         //  $scope.showNoticeListIcon=false;
+			$scope.$apply();
+               });
+       });
+			};
+			$scope.advertiseListInit();
+    				
+                    }
+            	} 
+            }
+        })
+        .state("main.advertiseAdd", {
+            url:"/advertiseAdd",
+            views: {
+            	'rightbody@main': {
+                    templateUrl: "/seller/templates/advertise_add.html",
+                    controller:function($scope){
+                    	$scope.advertise={
+                    		 advertise_id:'',
+                    		 title:'',
+                    		 type:'爱情测试',
+                    		 level:10,
+                    		 img:'',
+                    		 update_date:'',
+                    		 problemList:[
+                    		           {
+                    		        	   problem_id:'',
+                    		        	   name:'',
+                    		        	   type:'',
+                    		        	   img:'',
+                    		        	   order_number:'',
+                    		        	   update_date:'',
+                    		        	   answerList:[
+                    		        	               {
+                    		        	            	   answer_id:'',  
+                    		        	            	   name:'',  
+                    		        	            	   type:'',  
+                    		        	            	   img:'',  
+                    		        	            	   result:'',  
+                    		        	            	   update_date:''  
+                    		        	               }]
+                    		        	   
+                    		           }]                    		 
+                    	};
+                    	
+                    	//问题数目改变
+                    	$scope.problemListChange=function(problemNumber){
+                    		$scope.advertise.problemList=[];
+                    		//console.log(problemNumber)
+                    		for (var i = 0; i < problemNumber; i++) {
+                    			$scope.advertise.problemList.push({
+                    			   problem_id:'',
+             		        	   name:'',
+             		        	   type:'',
+             		        	   img:'',
+             		        	   order_number:'',
+             		        	   update_date:'',
+             		        	  answerList:[
+           		        	               {
+           		        	            	   answer_id:'',  
+           		        	            	   name:'',  
+           		        	            	   type:'',  
+           		        	            	   img:'',  
+           		        	            	   result:'',  
+           		        	            	   update_date:''  
+           		        	               }]
+	        	               });
+    							}
+                    	};
+                    	//答案数目改变
+                    	$scope.answerListChange=function(problem,answerNumber){
+                    		for (var i = 0; i < $scope.advertise.problemList.length; i++) {
+                    			//选择得当前问题
+                    			if($scope.advertise.problemList[i]==problem){
+                    			$scope.advertise.problemList[i].answerList=[];
+                    			//console.log(problem)
+                    			//console.log(answerNumber)
+                    			for (var j = 0; j < answerNumber; j++) {
+                    			//console.log($scope.advertise.problemList[i].answerList)
+                    			$scope.advertise.problemList[i].answerList.push({
+                    				   answer_id:'',  
+		        	            	   name:'',  
+		        	            	   type:'',  
+		        	            	   img:'',  
+		        	            	   result:'',  
+		        	            	   update_date:'',  
+	        	               });
+								}
+                    			}
+    						}
+                    	};
+                    	//上传测试图片
+                 		$("#advertiseFileUpload").change(function(){
+                    		//console.log($("#advertiseFileUpload"))
+                 		//function advertiseFileUpload(){
+                 			myUtils.fileUpload(
+                 				    {inputfile:$("#advertiseFileUpload"),
+                 				    ajaxObj:{
+                 				        formData:[
+                 				            {key:"advertiseFileUpload",value:$("#advertiseFileUpload").get(0).files[0]}
+                 				            ],
+                 				        url:"/advertise/img/add",
+                 				        success:function(data){
+                 				            if(data){
+                 				            myUtils.myLoadingToast("上传成功",null);
+                 				            myUtils.myPrevToast("上传成功",null,"remove");
+                 				           $scope.advertise.img=data;
+                 				           $scope.$apply();
+                 				            }
+                 				        }
+                 				    }
+                 				}
+                 				);
+                 		});
+                     	    //提交表单
+                    	$scope.addadvertiseForm=function(){
+                    		myUtils.myPrevToast("添加中", function(){
+                    		$.ajax({  
+              		          url : "/advertise/add/all",  
+              		          type : "post",  
+              		         // contentType:"application/json",
+              		          data:{advertiseDTO:angular.toJson($scope.advertise)},
+              		         // async : true,  
+              		          success : function(data){
+              		        	if(data.code==200){
+              		        		$scope.advertise={
+              	                    		 advertise_id:'',
+              	                    		 title:'',
+              	                    		 type:'爱情测试',
+              	                    		 level:10,
+              	                    		 img:'',
+              	                    		 update_date:'',
+              	                    		 problemList:[
+              	                    		           {
+              	                    		        	   problem_id:'',
+              	                    		        	   name:'',
+              	                    		        	   type:'',
+              	                    		        	   img:'',
+              	                    		        	   order_number:'',
+              	                    		        	   update_date:'',
+              	                    		        	   answerList:[
+              	                    		        	               {
+              	                    		        	            	   answer_id:'',  
+              	                    		        	            	   name:'',  
+              	                    		        	            	   type:'',  
+              	                    		        	            	   img:'',  
+              	                    		        	            	   result:'',  
+              	                    		        	            	   update_date:''  
+              	                    		        	               }]
+              	                    		        	   
+              	                    		           }]                    		 
+              	                    	};
+              		        	  $scope.$apply();
+              		        	  myUtils.myPrevToast("添加成功", null, "remove");
+              		        	  return;
+              		        	  }
+              		        	  myUtils.myPrevToast("添加失败", null, "remove");
+              		          }  
+              		          });  
+                    		}, "add");
+             			};
+                    }
+                } 
+            }
+        });
+		})
+       .controller('mainCtrl', function($scope,$http) {
+    	 //设置高度
+    	 /* setInterval(function(){
+			$(".seller-main-body").height($(".seller-main-body-right").height()+50);
+    		 
+    	 }, 300); */
+    	 $scope.devhost=location.protocol + "//" + location.host;
+    	 //验证是否已经登录
+    		$.get("/admin/islogin",function(data){
+       			console.log(data)
+       			//$scope.manager_phone=data.manager_phone;
+       		if(data==null||data==''){
+       			location.replace("/seller/index");
+       		}
+       	});
+   		//登录退出
+   		$scope.sellerLoginOut=function(){
+   			myUtils.myLoginOut("确定退出吗？", function(){
+   				$.get("/admin/loginout",function(data){
+   	   					myUtils.myLoadingToast("退出成功", null);   	   				
+   						location.replace("/seller/index");
+   	   			});
+   			});
+   		};
+   		
+   		});			
+     
+		</script>
+        </body>
+</html>

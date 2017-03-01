@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>点击列表</title>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport"
+	content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width">
+<meta name="keywords" content="点击列表">
+<meta charset="UTF-8">
+<meta name="description"
+	content="点击列表">
+<link href="/resources/css/bootstrap.min.css" rel="stylesheet">
+<link href="/resources/css/sellerbase.css" rel="stylesheet">
+<style>
+</style>
+</head>
+
+<body ng-app="indexApp">
+	<div ng-controller="indexCtrl" >
+<div style="margin:10px;">
+	 <label  class="text-danger" style="font-size:30px;color:#ccc;">点击列表</label>
+	
+</div>
+<!-- 点击列表选择end -->
+<!-- 点击列表 -->
+		<div style="width:100%" id="loclickAnimationBody">
+			<table class="table table-bordered" style="width:100%">
+			<tr>
+			  <th >点击ID</th>
+			  <th >appid</th>
+			  <th>idfa</th>
+			  <th >ip</th>
+			  <th >mac</th>
+			   <th >回调地址</th>
+			  <th >devid</th>
+			  <th >设备版本</th>
+			  <th >设备型号</th>
+			  <th >状态</th>
+			   <th >点击日期</th> 
+			</tr>
+			<tr ng-repeat="click in clickList" >
+			  <td ng-bind="click.click_id"></td> 
+			  <td ng-bind="click.appid"></td>
+			  <td ng-bind="click.idfa"></td>
+			  <td ng-bind="click.ip"></td>
+			  <td ng-bind="click.mac"></td>
+			   <td ng-bind="click.callback"></td> 
+			  <td ng-bind="click.devid"></td>
+			  <td ng-bind="click.osver"></td>
+			  <td ng-bind="click.devtype"></td> 
+			  <td ng-bind="click.status"></td>
+			  <td ng-bind="click.update_date"></td>
+			</tr>
+			</table>
+		</div>
+<!-- 点击列表end -->
+	<!-- 页面列表end -->
+<!-- 加载更多end -->
+<div ng-if="clickList.length <= 0" class="text-center alert alert-warning">
+       还没有点击！
+   </div>
+   <div >
+    <ul class="pagination " >
+    <li><a ng-click="toPage('首页')" >首页</a></li>
+    <li class="previous" ><a ng-click="toPage('previous')" >&larr;</a></li>
+
+    <li ng-repeat="currentPageNumber in showPageNumberArray"><a ng-click="toPage(currentPageNumber)" ng-class="{active:currentPageNumber==currentPage}">{{currentPageNumber}}</a></li>
+
+    <li class="next"  ><a ng-click="toPage('next')" >&rarr;</a></li>
+    <li><a ng-click="toPage('尾页')" >尾页</a></li>
+    <li> <span>总页数：{{totalPage}}</span></li>
+    <li><span>总数：{{totalNumber}}</span></li>
+    </ul>
+   </div>
+<!--  加载更多end -->
+
+		<!-- 底部end -->
+		<div class="comment-bottom" ng-if="noMore">Copyright 2015 itcast Inc,All rights reserved.</div>
+		<!--  底部end -->
+		</div>
+		<!-- 新闻列表end -->
+		<!-- 加载更多end -->
+		<!-- <a class="btn btn-default btn-block text-center" id="addMore" ng-click="addMore()">
+		<div>点击加载更多》</div>
+		</a> -->
+		<!--  加载更多end -->
+		
+	</div>
+		<!-- cnzz -->
+		<div style="display:none;">
+		<script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1260079475'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s11.cnzz.com/z_stat.php%3Fid%3D1260079475' type='text/javascript'%3E%3C/script%3E"));</script>
+		</div>
+	<script src="/resources/js/jquery2.1.js"></script>
+	<script src="/resources/js/bootstrap3.2.0.js"></script>
+	<script src="/resources/js/angularjs.min.1.5.7.js"></script>
+	<script src="/resources/js/base.js"></script>
+	<script>
+	$(function(){
+	//获取data-src
+	$("img").each(function(index){
+		if($(this).attr("data-src")){
+			$(this).attr("src",$(this).attr("data-src"));
+		}
+	});
+	//$("#loadAnimationBody").css("display","none");
+	});
+    	var indexApp=angular.module('indexApp',[]);
+    	  indexApp.filter("dateDiff",function(){
+                return function(dateTimeStamp){
+                    return myUtils.getDateDiff(dateTimeStamp);
+                }
+            });
+       
+					
+    	indexApp.controller('indexCtrl',function($scope){
+    	
+    	//$scope.$on('ngRepeatFinished', function (ngRepeatFinishedEvent) {
+		//render完成之后要执行的方法
+		//$("#loadAnimationBody").show();
+		//$(".loadAnimation").hide();
+		//});
+    		$("#topNav a").each(function(){
+    			//不存在，就展示首页
+    			if(myUtils.GetQueryString("type")==null){
+    			$("#topNav a:first-child").addClass("nav-active");
+    			}
+    			//存在哪个展示哪个
+    			if(myUtils.GetQueryString("type")==$(this).children().text()){
+    				console.log(myUtils.GetQueryString("type"))
+    				$(this).addClass("nav-active");
+    			}
+    			$(this).on("click",function(){
+    				var type=$(this).text().trim();
+    				$("#topNav a").removeClass("nav-active")
+    				$(this).addClass("nav-active");
+    				//点击哪个，展示哪个,是历史记录的重要点
+    				location.href=location.protocol+"//"+location.host+"/man/index?type="+type;
+    			});
+    			
+    		});
+  				
+  			$scope.clickList=[]; 		
+    		$scope.noMore=true;//false还有，true没有更多
+    		$scope.totalNumber=0;//总管理员数目
+ 			$scope.showPageNumberArray=[];//显示页面循环的数组 类似 1,2,3,4,5
+			$scope.totalPage=0;//总页数
+				
+			$scope.currentPage=1;//当前页
+			$scope.pageNumber=5;//每页显示数目
+			$scope.mostShowPageNumber=5;//设定最多显示页码数目	
+			$scope.pagination=myUtils.myPaginationHandler();
+			
+			//点击哪页显示哪页
+			$scope.toPage=function(content){
+			  if($scope.pagination.toPage(content,$scope.currentPage,$scope.totalPage)){
+			  //$scope.showNoticeListIcon=true;
+			  $scope.currentPage=$scope.pagination.currentPage;
+			  $scope.clickListInit();
+			  }
+			};
+			
+			$scope.clickListInit=function(){
+       		$scope.status=myUtils.GetQueryString("status")||"";//状态
+       
+			  $.get("/click/count/"+myUtils.GetQueryString("channel_id")+"/"+$scope.status,function(cd){
+           		$scope.totalNumber=cd;             
+           //页码初始化
+          $scope.totalPage=$scope.pagination.getTotalPage($scope.totalNumber,$scope.pageNumber);//总页码数目     
+          $scope.showPageNumberArray=$scope.pagination.getShowPageNumber($scope.totalPage,$scope.pageNumber,$scope.mostShowPageNumber,$scope.currentPage);//显示页码数目 
+        //初始化
+  $.get("/click/list?status="+$scope.status+"&channel_id="+myUtils.GetQueryString("channel_id")+"&pageNum="+(($scope.currentPage-1)*$scope.pageNumber+1)+"&pageSize="+$scope.pageNumber,function(pld){
+           $scope.clickList=pld;
+         //  $scope.showNoticeListIcon=false;
+			$scope.$apply();
+               });
+       });
+			};
+			$scope.clickListInit();
+    		
+
+    	});
+    </script>
+</body>
+</html>

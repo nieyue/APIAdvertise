@@ -1,0 +1,39 @@
+    <label  class="text-danger" style="font-size:30px;color:#ccc;">添加渠道</label>
+<br/>
+   <!-- 返回渠道按钮 -->
+<a class="btn btn-lg btn-primary" ng-click="goChannelList()">返回渠道列表</a>
+<!-- 返回渠道按钮end -->
+<!-- 增加测试 -->
+	<form novalidate name="myAddChannelForm" ng-submit="addChannelForm()">
+    <label  class="text-danger">※渠道姓名</label>
+  <div class=" comment-input-margin">
+    <input type="text" class=" comment-input" required ng-model="name" name="name" ng-minlength="2" ng-maxlength="16"  placeholder="输入渠道姓名">
+    <span class="text-danger alert alert-danger " ng-show="myAddChannelForm.name.$dirty && myAddChannelForm.name.$invalid">
+				    	<i class="glyphicon glyphicon-info-sign"></i>2-16位
+				    </span>
+  </div>
+    <label  class="text-danger">※手机号</label>
+  <div class=" comment-input-margin">
+    <input type="text" class=" comment-input" ng-model="cell_phone" name="cell_phone" required ng-pattern="/^(13[0-9]|15[012356789]|17[678]|18[0-9]|14[57])[0-9]{8}$/" placeholder="输入手机号">
+    <span class="text-danger alert alert-danger " ng-show="myAddChannelForm.cell_phone.$dirty && myAddChannelForm.cell_phone.$invalid">
+				    	<i class="glyphicon glyphicon-info-sign"></i>输入正确手机号码
+				    </span>
+  </div>
+    <label  class="text-danger">※email</label>
+  <div class=" comment-input-margin">
+    <input type="text" class=" comment-input" ng-model="email" name="email" required ng-pattern="/^([a-zA-Z0-9]+[_|\-|\.]?)*[a-zA-Z0-9]+@([a-zA-Z0-9]+[_|\-|\.]?)*[a-zA-Z0-9]+(\.[a-zA-Z]{2,3})+$/" placeholder="输入email">
+    <span class="text-danger alert alert-danger " ng-show="myAddChannelForm.email.$dirty && myAddChannelForm.email.$invalid">
+				    	<i class="glyphicon glyphicon-info-sign"></i>输入正确email
+				    </span>
+  </div>
+    <label  class="text-danger">※密码</label>
+  <div class=" comment-input-margin">
+    <input type="text" class=" comment-input" ng-model="password" name="password" required ng-minlength="6" ng-maxlength="16" placeholder="输入密码">
+    <span class="text-danger alert alert-danger " ng-show="myAddChannelForm.password.$dirty && myAddChannelForm.password.$invalid">
+				    	<i class="glyphicon glyphicon-info-sign"></i>6-16位
+				    </span>
+  </div>
+  <input type="submit" class="btn btn-lg btn-danger" 
+  ng-disabled="( myAddChannelForm.$invalid)||(myAddChannelForm.password.$dirty && myAddChannelForm.password.$invalid) ||(myAddChannelForm.email.$dirty && myAddChannelForm.email.$invalid) || (myAddChannelForm.cell_phone.$dirty && myAddChannelForm.cell_phone.$invalid)|| (myAddChannelForm.name.$dirty && myAddChannelForm.name.$invalid)" value="保存发布"/>
+</form>
+<!-- 增加测试 end-->

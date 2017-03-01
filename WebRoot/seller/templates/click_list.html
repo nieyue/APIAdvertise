@@ -1,0 +1,58 @@
+<!-- 点击列表选择 -->
+<div style="margin:10px;">
+	 <label  class="text-danger" style="font-size:30px;color:#ccc;">点击列表</label>
+	
+</div>
+<!-- 点击列表选择end -->
+<a class="btn btn-lg btn-primary" ng-click="goChannelList()">返回渠道列表</a>
+<!-- 点击列表 -->
+		<div style="width:100%" id="loclickAnimationBody">
+			<table class="table table-bordered" style="width:100%">
+			<tr>
+			  <th >点击ID</th>
+			  <th >appid</th>
+			  <th>idfa</th>
+			  <th >ip</th>
+			  <th >mac</th>
+			   <th >回调地址</th>
+			  <th >devid</th>
+			  <th >设备版本</th>
+			  <th >设备型号</th>
+			  <th >状态</th>
+			   <th >点击日期</th> 
+			</tr>
+			<tr ng-repeat="click in clickList" >
+			  <td ng-bind="click.click_id"></td> 
+			  <td ng-bind="click.appid"></td>
+			  <td ng-bind="click.idfa"></td>
+			  <td ng-bind="click.ip"></td>
+			  <td ng-bind="click.mac"></td>
+			   <td ng-bind="click.callback"></td> 
+			  <td ng-bind="click.devid"></td>
+			  <td ng-bind="click.osver"></td>
+			  <td ng-bind="click.devtype"></td> 
+			  <td ng-bind="click.status"></td>
+			  <td ng-bind="click.update_date"></td>
+			</tr>
+			</table>
+		</div>
+<!-- 点击列表end -->
+	<!-- 页面列表end -->
+<!-- 加载更多end -->
+<div ng-if="clickList.length <= 0" class="text-center alert alert-warning">
+       还没有广告！
+   </div>
+   <div >
+    <ul class="pagination " >
+    <li><a ng-click="toPage('首页')" >首页</a></li>
+    <li class="previous" ><a ng-click="toPage('previous')" >&larr;</a></li>
+
+    <li ng-repeat="currentPageNumber in showPageNumberArray"><a ng-click="toPage(currentPageNumber)" ng-class="{active:currentPageNumber==currentPage}">{{currentPageNumber}}</a></li>
+
+    <li class="next"  ><a ng-click="toPage('next')" >&rarr;</a></li>
+    <li><a ng-click="toPage('尾页')" >尾页</a></li>
+    <li> <span>总页数：{{totalPage}}</span></li>
+    <li><span>总数：{{totalNumber}}</span></li>
+    </ul>
+   </div>
+<!--  加载更多end -->

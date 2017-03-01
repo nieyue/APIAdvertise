@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>app市场</title>
+<meta name="baidu_union_verify" content="d98a740e1480fdd663c524b7e4c0b3be">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport"
+	content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width">
+<meta name="keywords" content="app市场">
+<meta charset="UTF-8">
+<meta name="description"
+	content="app市场">
+<link href="/resources/css/bootstrap.min.css" rel="stylesheet">
+<link href="/resources/css/base.css" rel="stylesheet">
+<style>
+tr td{
+max-width:280px;
+word-wrap: break-word; 
+}
+</style>
+</head>
+
+<body ng-app="indexApp">
+	<div ng-controller="indexCtrl" >
+		<!-- 新闻列表 -->
+		<div class='loadAnimation' ><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+		<div style="display:none" id="loadAnimationBody">
+		<!-- 第二列表 -->
+			<table class="table table-bordered">
+			<tr>
+			  <th >广告ID</th>
+			  <th>广告名称</th>
+			  <th >包名bundleId</th>
+			  <th >任务要求</th>
+			  <th >货币</th>
+			  <th >国家</th>
+			  <th >图标</th>
+			  <!-- <th >价格</th> -->
+			  <th >投放链接</th>
+			  <th >预览链接</th>
+			  <th >任务数量</th>
+			  <th >获取日期</th>
+			</tr>
+			<tr ng-repeat="advertise in advertiseList" on-finish-render-filters>
+			  <td ng-bind="advertise.app_id"></td>
+			  <td ng-bind="advertise.ad_name"></td>
+			  <td ng-bind="advertise.bundle_id"></td>
+			  <td ng-bind="advertise.task_demands"></td>
+			  <td ng-bind="advertise.currency"></td>
+			  <td ng-bind="advertise.country"></td>
+			  <td ng-bind="advertise.icon_url"></td>
+			  <!-- <td ng-bind="advertise.price"></td> -->
+			  <td ng-bind="advertise.app_url"></td>
+			  <td ng-bind="advertise.preview_url"></td>
+			  <td ng-bind="advertise.task_num"></td>
+			  <td ng-bind="advertise.update_date"></td>
+			</tr>
+			</table>
+		<!-- 第二列表end -->
+		<!-- 底部end -->
+		<div class="comment-bottom" ng-if="noMore">Copyright 2015 itcast Inc,All rights reserved.</div>
+		<!--  底部end -->
+		</div>
+		<!-- 新闻列表end -->
+		<!-- 加载更多end -->
+		<!-- <a class="btn btn-default btn-block text-center" id="addMore" ng-click="addMore()">
+		<div>点击加载更多》</div>
+		</a> -->
+		<!--  加载更多end -->
+		
+	</div>
+		<!-- cnzz -->
+		<div style="display:none;">
+		<script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1260079475'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s11.cnzz.com/z_stat.php%3Fid%3D1260079475' type='text/javascript'%3E%3C/script%3E"));</script>
+		</div>
+	<script src="/resources/js/jquery2.1.js"></script>
+	<script src="/resources/js/bootstrap3.2.0.js"></script>
+	<script src="/resources/js/angularjs.min.1.5.7.js"></script>
+	<script src="/resources/js/base.js"></script>
+	<script>
+	$(function(){
+	//获取data-src
+	$("img").each(function(index){
+		if($(this).attr("data-src")){
+			$(this).attr("src",$(this).attr("data-src"));
+		}
+	});
+	//$("#loadAnimationBody").css("display","none");
+	});
+    	var indexApp=angular.module('indexApp',[]);
+    	  indexApp.filter("dateDiff",function(){
+                return function(dateTimeStamp){
+                    return myUtils.getDateDiff(dateTimeStamp);
+                }
+            });
+            indexApp.directive('onFinishRenderFilters', function() {
+					return {
+					restrict: 'A',
+					link: function(scope, element, attr) {
+					if (scope.$last === true) {
+					$("#loadAnimationBody").show();
+					$(".loadAnimation").hide();
+					scope.$emit('ngRepeatFinished');
+					}
+					}
+					};
+					});
+					
+    	indexApp.controller('indexCtrl',function($scope){
+    	
+    	//$scope.$on('ngRepeatFinished', function (ngRepeatFinishedEvent) {
+		//render完成之后要执行的方法
+		//$("#loadAnimationBody").show();
+		//$(".loadAnimation").hide();
+		//});
+    		$("#topNav a").each(function(){
+    			//不存在，就展示首页
+    			if(myUtils.GetQueryString("type")==null){
+    			$("#topNav a:first-child").addClass("nav-active");
+    			}
+    			//存在哪个展示哪个
+    			if(myUtils.GetQueryString("type")==$(this).children().text()){
+    				console.log(myUtils.GetQueryString("type"))
+    				$(this).addClass("nav-active");
+    			}
+    			$(this).on("click",function(){
+    				var type=$(this).text().trim();
+    				$("#topNav a").removeClass("nav-active")
+    				$(this).addClass("nav-active");
+    				//点击哪个，展示哪个,是历史记录的重要点
+    				location.href=location.protocol+"//"+location.host+"/man/index?type="+type;
+    			});
+    			
+    		});
+    		function initData(a){
+    			$.ajax({  
+    		          type : "get",  
+    		          url : "/advertise/list?pageNum="+a.pageNum+"&pageSize="+a.pageSize+"&orderName="+a.orderName+"&orderWay="+a.orderWay+"",  
+    		          async : false,  
+    		          success : function(data){
+    		        	  if(data==''){
+    		        		  $("#addMore").hide();
+    		        		  return ;
+    		        	  }else{
+    		        		  $("#addMore").show();
+    		        		  
+    		        	  }
+    		        	  if(a.pageNum>1){
+    		        		  for (var int = 0; int < data.length; int++) {
+    		        			$scope.advertiseList.push(data[int]); 
+							}
+    		        	  }else{
+    		        	  $scope.advertiseList=data; 
+    		        		  
+    		        	  } 
+    		        	  console.log($scope.advertiseList)
+    		        	  myUtils.myPrevToast("加载完成", null, "remove");
+    		          }  
+    		          });  
+    		}
+    		$scope.noMore=false;//false还有，true没有更多
+    		$scope.pageNum=1;//第多少个
+    		$scope.pageSize=10;//每页个数
+    			initData({
+    			pageNum:$scope.pageNum,
+    			pageSize:$scope.pageSize,
+    			orderName:"update_date",
+    			orderWay:"desc"
+    			});
+    	    //选择频道
+    		$scope.list=function(type){
+    		$scope.pageNum=1;
+    		$scope.pageSize=10;
+    			myUtils.myPrevToast("加载中...", function(){
+    			initData({
+        			pageNum:$scope.pageNum,
+        			pageSize:$scope.pageSize,
+        			orderName:"update_date",
+        			orderWay:"desc"
+        			});
+    			}, "add");
+    			
+    		};
+    			//滚动刷新
+    		function onReachBottom(){
+    			$scope.pageNum=$scope.pageNum+$scope.pageSize;
+    			$scope.pageSize=$scope.pageSize;
+    			myUtils.myFootLoadingToast("relative",null,function(){
+    			$.ajax({  
+  		          type : "get",
+  		          timeout: 3000,
+  		          async : false,
+  		          url : "/advertise/list?pageNum="+$scope.pageNum+"&pageSize="+$scope.pageSize+"&orderName=update_date&orderWay=desc",  
+  		          complete: function (xhr) {
+                  myUtils.myFootLoadingToast("relative",null,null,"remove");
+  				if(xhr.responseJSON&&xhr.responseJSON.code==40000){
+                  myUtils.myLoadingToast("请求失败！请检查！");
+                	return ;
+         		 }
+  				},
+  		          success : function(data){
+  		      		     myUtils.myFootLoadingToast("relative",null,null,"remove");
+  		        	 if(data.length<=0){
+  		        	 $scope.noMore=true;
+  		        	 $scope.$apply();
+  		        	      return;
+  		        	    }
+  		        	    	$scope.noMore=false;
+  		      		        $scope.advertiseList=$scope.advertiseList.concat(data);
+  		      		        $scope.$apply();
+  		      		         myUtils.myPrevToast("加载完成", null, "remove");
+  		          }  
+  		          });
+    			},"add");
+  		}
+    		$(window).scroll(function(){
+        		console.log($scope.noMore);
+        		if(!navigator.onLine){
+        		myUtils.myLoadingToast("请检查网络！");
+        		return;
+        		}
+        		if(navigator.onLine && $scope.noMore==false && myUtils.isScrollBottom(document)){
+        			onReachBottom();
+        		}
+        			
+        		});
+    		
+
+    	});
+    </script>
+</body>
+</html>

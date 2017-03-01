@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+		PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"   
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="com.nieyue.dao.AdDao">
+<!-- 添加渠道广告 -->
+<insert id="addAd" parameterType="Ad" keyProperty="adId" flushCache="true"  >  
+   INSERT IGNORE INTO
+   		  ad_tb 
+   		 (
+   		 app_id,
+   		 ad_name,
+   		 bundle_id,
+   		 task_demands,
+   		 currency,
+   		 country,
+   		 icon_url,
+   		 price,
+   		 app_url,
+   		 preview_url,
+   		 task_num,
+   		 update_date,
+   		 channel_id
+   		 )
+   VALUES
+    	 (
+    	 #{appId},
+    	 #{adName},
+    	 #{bundleId},
+    	 #{taskDemands},
+    	 #{currency},
+    	 #{country},
+    	 #{iconUrl},
+    	 #{price},
+    	 #{appUrl},
+    	 #{previewUrl},
+    	 #{taskNum},
+    	 #{updateDate},
+    	 #{channelId}
+    	 )  
+</insert>  
+<!-- 更新渠道广告 -->
+<update id="updateAd" parameterType="Ad" >  
+    UPDATE 
+    	ad_tb 
+    SET 
+    	 app_id=#{appId},
+    	 ad_name=#{adName},
+   		 bundle_id=#{bundleId},
+   		 task_demands=#{taskDemands},
+   		 currency=#{currency},  
+   		 country=#{country},
+   		 icon_url=#{iconUrl},
+   		 price=#{price},
+   		 app_url=#{appUrl},
+   		 preview_url=#{previewUrl},
+   		 task_num=#{taskNum},
+   		 update_date=#{updateDate},
+   		 channel_id=#{channelId}
+    WHERE
+    	 ad_id=#{adId} 
+</update> 
+<!-- 删除渠道广告-->
+<delete id="delAd"  parameterType="Integer" >  
+    DELETE FROM
+    	 ad_tb 
+    	 WHERE ad_id=#{adId}
+</delete>  
+<!-- 加载渠道广告-->
+<select id="loadAd" parameterType="Integer" resultType="Ad" >
+SELECT 
+		 ad_id,
+		 app_id,
+	 	 ad_name,
+   		 bundle_id,
+   		 task_demands,
+   		 currency,
+   		 country,
+   		 icon_url,
+   		 price,
+   		 app_url,
+   		 preview_url,
+   		 task_num,
+   		 update_date,
+   		 channel_id
+FROM ad_tb 
+WHERE ad_id=#{adId}
+</select>
+
+<!--  根据appID装载渠道广告-->
+<select id="loadAdByAppId" parameterType="Integer" resultType="Ad" >
+SELECT 
+		 ad_id,
+		 app_id,
+	 	 ad_name,
+   		 bundle_id,
+   		 task_demands,
+   		 currency,
+   		 country,
+   		 icon_url,
+   		 price,
+   		 app_url,
+   		 preview_url,
+   		 task_num,
+   		 update_date,
+   		 channel_id
+FROM ad_tb 
+WHERE app_id=#{appId} AND channel_id=#{channelId}
+</select>
+
+<!-- 分页查询渠道广告-->
+<select id="browsePagingAd" resultType="Ad">  
+    SELECT
+	     ad_id,
+	     app_id,
+	 	 ad_name,
+   		 bundle_id,
+   		 task_demands,
+   		 currency,
+   		 country,
+   		 icon_url,
+   		 price,
+   		 app_url,
+   		 preview_url,
+   		 task_num,
+   		 update_date,
+   		 channel_id
+	FROM ad_tb
+	ORDER BY
+		${orderName}  ${orderWay}
+	LIMIT
+		#{pageNum},#{pageSize}
+</select> 
+<!-- 根据渠道ID分页查询渠道广告-->
+<select id="browsePagingAdByChannelId" resultType="Ad">  
+    SELECT
+	     ad_id,
+	     app_id,
+	 	 ad_name,
+   		 bundle_id,
+   		 task_demands,
+   		 currency,
+   		 country,
+   		 icon_url,
+   		 price,
+   		 app_url,
+   		 preview_url,
+   		 task_num,
+   		 update_date,
+   		 channel_id
+	FROM ad_tb
+	WHERE channel_id=#{channelId}
+	ORDER BY
+		${orderName}  ${orderWay}
+	LIMIT
+		#{pageNum},#{pageSize}
+</select> 
+
+<!-- 统计记录条数 -->
+<select id="countAll"  resultType="int">  
+	SELECT
+	 	count(ad_id)
+	FROM ad_tb
+</select>   
+<!-- 根据渠道统计记录条数 -->
+<select id="countAllByChannelId"  resultType="int">  
+	SELECT
+	 	count(ad_id)
+	FROM ad_tb
+	WHERE channel_id=#{channelId}
+</select>   
+ 
+</mapper>

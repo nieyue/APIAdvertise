@@ -1,0 +1,65 @@
+<!-- 渠道列表选择 -->
+<div style="margin:10px;">
+	 <label  class="text-danger" style="font-size:30px;color:#ccc;">渠道列表</label>
+</div>
+<!-- 渠道列表选择end -->
+<!-- 添加渠道按钮 -->
+<br/><a class="btn btn-lg btn-primary" ng-click="goChannelAdd()">添加渠道</a>
+<!-- 添加渠道按钮end -->
+<!-- 渠道列表 -->
+		<div style="width:100%" id="loadAnimationBody" ng-if="channelList.length>0">
+			<table class="table table-bordered" style="width:100%">
+			<tr>
+			  <th >渠道ID</th>
+			  <th>姓名</th>
+			  <th >电话</th>
+			  <th >email</th>
+			  <th >api_token</th>
+			  <th >注册日期</th>
+			  <th >最后登陆日期</th>
+			  <th >有价格广告链接</th>
+			  <th >无价格广告链接</th>
+			  <th >点击链接</th>
+			  <th >回调链接</th>
+			  <th >操作</th>
+			</tr>
+			<tr ng-repeat="channel in channelList">
+			  <td ng-bind="channel.channel_id"></td>
+			  <td ng-bind="channel.name"></td>
+			  <td ng-bind="channel.cell_phone"></td>
+			  <td ng-bind="channel.email"></td>
+			  <td ng-bind="channel.api_token"></td>
+			  <td ng-bind="channel.create_date"></td>
+			  <td ng-bind="channel.last_login_date"></td>
+			  <td style="max-width:150px"><a style="background-color:white !important;color:red !important" href="{{devhost}}/rp/admin/ad?channel_id={{channel.channel_id}}&api_token={{channel.api_token}}&v=p">{{devhost}}/rp/admin/ad?channel_id={{channel.channel_id}}&api_token={{channel.api_token}}&v=p</a></td>
+			  <td style="max-width:150px"><a style="background-color:white !important;color:red !important " href="{{devhost}}/rp/admin/ad?channel_id={{channel.channel_id}}&api_token={{channel.api_token}}&v=n">{{devhost}}/rp/admin/ad?channel_id={{channel.channel_id}}&api_token={{channel.api_token}}&v=n</a></td>
+			  <td style="max-width:150px"><a style="background-color:white !important;color:red !important" href="{{devhost}}/rp/admin/click?channel_id={{channel.channel_id}}">{{devhost}}/rp/admin/click?channel_id={{channel.channel_id}}</a></td>
+			  <td style="max-width:150px"><a style="background-color:white !important;color:red !important" href="{{devhost}}/rp/admin/click?channel_id={{channel.channel_id}}&status=成功">{{devhost}}/rp/admin/click?channel_id={{channel.channel_id}}&status=成功</a></td>
+			  <td >
+			  	<a class="btn btn-sm btn-info" ng-click="goAd(channel.channel_id,channel.api_token)">广告列表</a>
+			  	<a class="btn btn-sm btn-info" ng-click="goClick(channel.channel_id)">点击列表</a>
+			  	<a class="btn btn-sm btn-info" ng-click="delChannel(channel)">删除渠道</a>
+			  </td>
+			</tr>
+			</table>
+		</div>
+<!-- 渠道列表end -->
+	<!-- 页面列表end -->
+<!-- 加载更多end -->
+<div ng-if="channelList.length <= 0" class="text-center alert alert-warning">
+       还没有渠道，点击上面的添加渠道快速添加吧！
+   </div>
+   <div >
+    <ul class="pagination " >
+    <li><a ng-click="toPage('首页')" >首页</a></li>
+    <li class="previous" ><a ng-click="toPage('previous')" >&larr;</a></li>
+
+    <li ng-repeat="currentPageNumber in showPageNumberArray"><a ng-click="toPage(currentPageNumber)" ng-class="{active:currentPageNumber==currentPage}">{{currentPageNumber}}</a></li>
+
+    <li class="next"  ><a ng-click="toPage('next')" >&rarr;</a></li>
+    <li><a ng-click="toPage('尾页')" >尾页</a></li>
+    <li> <span>总页数：{{totalPage}}</span></li>
+    <li><span>总数：{{totalNumber}}</span></li>
+    </ul>
+   </div>
+<!--  加载更多end -->

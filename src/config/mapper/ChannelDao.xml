@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+		PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"   
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="com.nieyue.dao.ChannelDao">
+<!-- 添加渠道 -->
+<insert id="addChannel" parameterType="Channel" keyProperty="channelId" flushCache="true"  >  
+   INSERT IGNORE INTO
+   		  channel_tb 
+   		 (name,
+   		 cell_phone,
+   		 email,
+   		 password,
+   		 api_token,
+   		 create_date,
+   		 last_login_date
+   		 )
+   VALUES
+    	 (#{name},
+    	 #{cellPhone},
+    	 #{email},
+    	 #{password},
+    	 #{apiToken},
+    	 #{createDate},
+    	 #{lastLoginDate})
+</insert>  
+<!-- 更新渠道 -->
+<update id="updateChannel" parameterType="Channel" >  
+    UPDATE 
+    	channel_tb 
+    SET 
+    	name=#{name},
+    	cell_phone=#{cellPhone},
+    	email=#{email},
+    	password=#{password},
+    	api_token=#{apiToken},
+    	create_date=#{createDate},
+    	last_login_date=#{lastLoginDate}
+    WHERE
+    	 Channel_id=#{ChannelId} 
+</update> 
+<!-- 删除渠道-->
+<delete id="delChannel"  parameterType="Integer" >  
+    DELETE FROM
+    	 channel_tb 
+    	 WHERE channel_id=#{channelId}
+</delete>  
+<!-- 加载渠道-->
+<select id="loadChannel" parameterType="Integer" resultType="Channel" >
+SELECT 
+		 channel_id,
+	 	 name,
+   		 cell_phone,
+   		 email,
+   		 password,
+   		 api_token,
+   		 create_date,
+   		 last_login_date
+FROM channel_tb 
+WHERE channel_id=#{channelId}
+</select>
+<!-- 渠道登录-->
+<select id="loginChannel" parameterType="String" resultType="Channel" >
+SELECT 
+		 channel_id,
+	 	 name,
+   		 cell_phone,
+   		 email,
+   		 password,
+   		 api_token,
+   		 create_date,
+   		 last_login_date
+FROM channel_tb 
+WHERE 
+(cell_phone=#{channelName}  OR email=#{channelName}) 
+AND password=#{password}
+</select>
+<!-- 用令牌渠道登录-->
+<select id="apiTokenChannel" parameterType="String" resultType="Channel" >
+SELECT 
+		 channel_id,
+	 	 name,
+   		 cell_phone,
+   		 email,
+   		 password,
+   		 api_token,
+   		 create_date,
+   		 last_login_date
+FROM channel_tb 
+WHERE 
+  api_token=#{apiToken}
+</select>
+<!-- 分页查询渠道-->
+<select id="browsePagingChannel" resultType="Channel">  
+    SELECT
+	     channel_id,
+	 	 name,
+   		 cell_phone,
+   		 email,
+   		 password,
+   		 api_token,
+   		 create_date,
+   		 last_login_date
+	FROM channel_tb
+	ORDER BY
+		${orderName}  ${orderWay}
+	LIMIT
+		#{pageNum},#{pageSize}
+</select> 
+<!-- 查询全部渠道-->
+<select id="browseAllChannel" resultType="Channel">  
+    SELECT
+	     channel_id,
+	 	 name,
+   		 cell_phone,
+   		 email,
+   		 password,
+   		 create_date,
+   		 last_login_date
+	FROM channel_tb
+	ORDER BY
+		${orderName}  ${orderWay}
+</select> 
+
+<!-- 统计记录条数 -->
+<select id="countAll"  resultType="int">  
+	SELECT
+	 	count(channel_id)
+	FROM channel_tb
+</select>   
+   
+ 
+</mapper>
